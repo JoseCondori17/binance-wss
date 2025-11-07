@@ -1,0 +1,30 @@
+[project]
+name = "binance-wss"
+version = "0.1.0"
+description = "ETL with BinanceAPI, Airflow, MongoDB and Streamlit"
+authors = [
+    {name = "JoseCondori17",email = "jose.condori.p@utec.edu.pe"}
+]
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "polars (>=1.35.1,<2.0.0)",
+    "python-binance (>=1.0.32,<2.0.0)",
+    "streamlit (>=1.51.0,<2.0.0)",
+    "beanie (>=2.0.0,<3.0.0)",
+    "pydantic-settings (>=2.11.0,<3.0.0)",
+    "plotly (>=6.4.0,<7.0.0)",
+    "nbformat (>=5.10.4,<6.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "binance_wss", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "ipykernel (>=7.1.0,<8.0.0)"
+]
