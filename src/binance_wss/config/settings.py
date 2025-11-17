@@ -1,12 +1,11 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import MongoDsn
 
 class Settings(BaseSettings):
     BINANCE_API_KEY: str
     BINANCE_API_SECRET_KEY: str
     BINANCE_API_BASE_URL: str
 
-    MONGODB_URI: MongoDsn
+    MONGODB_URI: str
     MONGODB_DB_NAME: str
     MONGODB_COLLECTION_NAME: str
 

@@ -6,7 +6,7 @@ authors = [
     {name = "JoseCondori17",email = "jose.condori.p@utec.edu.pe"}
 ]
 readme = "README.md"
-requires-python = ">=3.12,<4.0"
+requires-python = ">=3.12,<3.14"
 dependencies = [
     "polars (>=1.35.1,<2.0.0)",
     "python-binance (>=1.0.32,<2.0.0)",
@@ -16,6 +16,9 @@ dependencies = [
     "plotly (>=6.4.0,<7.0.0)",
     "nbformat (>=5.10.4,<6.0.0)"
 ]
+
+[project.optional-dependencies]
+airflow = ["apache-airflow (>=3.1.3,<4.0.0)"]
 
 [tool.poetry]
 packages = [{include = "binance_wss", from = "src"}]

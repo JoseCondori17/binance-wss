@@ -50,11 +50,14 @@ def extract_aggtrades(
     time.sleep(0.2)
     return df
 
-# pendiente: extraer todos los agg trades entre un rango de tiempo, haciendo multiples llamadas si es necesario
 def extract_all():
-    klines = extract_klines("BTCUSDT", 1000)
-    start_time = klines[0, "open_time"]
-    end_time = klines[-1, "open_time"] + 60_000
+    limit = 10
+    klines = extract_klines("BTCUSDT", limit)
+    result = []
+    for row in klines.iter_rows(named=True):
+        open_time = row["open_time"]
+        close_time = row["close_time"]
+        agg_df = extract_aggtrades("BTCUSDT", open_time, close_time, limit)
+        result.append({"kline_open": open_time, "aggtrades": agg_df})
 
-    aggtrades = extract_aggtrades("BTCUSDT", start_time, end_time, 1000)
-    return {"klines": klines, "aggtrades": aggtrades}
+    return {"klines": klines, "aggtrades": result}
