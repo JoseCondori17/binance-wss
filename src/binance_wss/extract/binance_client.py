@@ -1,10 +1,17 @@
 import time
 import polars as pl
-
 from binance.client import Client
+from binance_wss.config.settings import settings
+
+# El cliente de Binance usa 'tld' 
+# Por defecto usa https://api.binance.com
+client = Client(
+    api_key=settings.BINANCE_API_KEY,
+    api_secret=settings.BINANCE_API_SECRET_KEY
+)
 
 def extract_klines(symbol: str, limit: int | None):
-    client = Client()
+    #client = Client()
     interval = Client.KLINE_INTERVAL_1MINUTE
     data = client.get_historical_klines(
         symbol=symbol,
@@ -28,7 +35,7 @@ def extract_aggtrades(
     end_time: int | None, 
     limit: int | None
 ):
-    client = Client()
+    #client = Client()
     data = client.get_aggregate_trades(
         symbol=symbol,
         startTime=start_time,
@@ -53,11 +60,21 @@ def extract_aggtrades(
 def extract_all():
     limit = 10
     klines = extract_klines("BTCUSDT", limit)
+
     result = []
     for row in klines.iter_rows(named=True):
         open_time = row["open_time"]
         close_time = row["close_time"]
         agg_df = extract_aggtrades("BTCUSDT", open_time, close_time, limit)
-        result.append({"kline_open": open_time, "aggtrades": agg_df})
 
-    return {"klines": klines, "aggtrades": result}
+        result.append({
+            "kline_open": int(open_time),
+            "aggtrades": agg_df.to_dicts(),  # lista[dict]
+        })
+
+    # Lo que se manda por XCom:
+    payload = {
+        "klines": klines.to_dicts(),  # lista[dict]
+        "aggtrades": result,          # lista[dict{kline_open, aggtrades:list[dict]}]
+    }
+    return payload

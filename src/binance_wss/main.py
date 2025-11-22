@@ -1,17 +1,15 @@
-import asyncio
+from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
-from pymongo import AsyncMongoClient
 
-from config.settings import settings
-from load.mongo_loader import Kline, AggTrade
+from binance_wss.config.settings import settings
+from binance_wss.models.mongo_models import Kline
+
 
 async def init_db():
-    client = AsyncMongoClient(settings.MONGODB_URI)
-    database = client[settings.MONGODB_DB_NAME]
-    await init_beanie(
-        database=database, 
-        document_models=[Kline, AggTrade]
-    )
+    client = AsyncIOMotorClient(settings.MONGODB_URI)
+    db = client[settings.MONGODB_DB_NAME]
 
-if __name__ == "__main__":
-    asyncio.run(init_db())
+    await init_beanie(
+        database=db,
+        document_models=[Kline],
+    )
