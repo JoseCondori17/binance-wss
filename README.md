@@ -66,6 +66,8 @@ pip install -e .
 - `beanie`: ODM para MongoDB
 - `pydantic-settings`: Para configuración
 - `plotly`: Para visualizaciones
+- `fastapi`: Framework para la API REST
+- `uvicorn`: Servidor ASGI para FastAPI
 
 **Nota:** Si necesitas Airflow, instala las dependencias opcionales:
 ```bash
@@ -81,6 +83,29 @@ python -m src.binance_wss.main
 ```
 
 **¿Por qué?** Este comando inicializa Beanie (ODM de MongoDB) y crea los índices necesarios en las colecciones. Debe ejecutarse una vez antes de usar el proyecto.
+
+### Ejecutar la API REST (FastAPI)
+
+```bash
+python -m src.binance_wss.run_api
+# o directamente:
+uvicorn binance_wss.api:app --reload --host 0.0.0.0 --port 8000
+```
+
+**¿Por qué?** Inicia el servidor FastAPI en `http://localhost:8000` con endpoints CRUD para gestionar las velas.
+
+**Documentación interactiva:**
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+**Endpoints disponibles:**
+- `GET /klines` - Listar velas (con filtros: symbol, fechas, paginación)
+- `POST /klines` - Crear una nueva vela
+- `GET /klines/{id}` - Obtener una vela por ID
+- `PUT /klines/{id}` - Actualizar una vela
+- `DELETE /klines/{id}` - Eliminar una vela
+- `GET /klines/stats/symbols` - Listar símbolos únicos
+- `GET /klines/stats/count` - Contar velas con filtros
 
 ### Ejecutar el Dashboard (Streamlit)
 
@@ -153,6 +178,10 @@ binance-wss/
 │   ├── transform/       # Transformación de datos
 │   ├── load/            # Carga a MongoDB
 │   ├── kpis/            # Indicadores y KPIs
+│   ├── models/          # Modelos de Beanie (Kline, AggTrade)
+│   ├── api.py           # API REST con FastAPI
+│   ├── run_api.py       # Script para ejecutar la API
+│   ├── run_etl_once.py  # Script para ejecutar ETL una vez
 │   └── main.py          # Inicialización de BD
 ├── dashboard/           # Dashboard Streamlit
 ├── airflow-local/       # DAGs de Airflow
