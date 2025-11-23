@@ -1,0 +1,36 @@
+# Dockerfile para FastAPI Backend
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar archivos de dependencias
+COPY pyproject.toml ./
+
+# Instalar pip-tools y dependencias
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir \
+    polars>=1.35.1 \
+    python-binance>=1.0.32 \
+    beanie>=2.0.0 \
+    pydantic-settings>=2.11.0 \
+    fastapi>=0.115.0 \
+    uvicorn[standard]>=0.32.0 \
+    motor>=3.7.1
+
+# Copiar código fuente
+COPY src/ /app/src/
+
+# Variables de entorno
+ENV PYTHONPATH=/app/src
+ENV PYTHONUNBUFFERED=1
+
+# Exponer puerto
+EXPOSE 8000
+
+# Comando por defecto
+CMD ["uvicorn", "binance_wss.app.app:app", "--host", "0.0.0.0", "--port", "8000"]

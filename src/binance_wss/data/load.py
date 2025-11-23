@@ -50,7 +50,7 @@ async def load_to_mongo(**context):
         kline_data = {
             "open_time": open_time,
             "close_time": close_time,
-            "symbol": "BTCUSDT",  # modify
+            "symbol": str(row["symbol"]),
             "interval": "1m",
             "open_price": float(row["open"]),
             "close_price": float(row["close"]),
