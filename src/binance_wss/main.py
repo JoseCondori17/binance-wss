@@ -1,7 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 
-from binance_wss.config.settings import settings
+from binance_wss.app.config import settings
 from binance_wss.models.mongo_models import Kline
 
 

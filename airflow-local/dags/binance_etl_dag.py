@@ -3,9 +3,9 @@ from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-from binance_wss.extract.binance_client import extract_all
-from binance_wss.transform.kline_processor import transform_merge
-from binance_wss.load.mongo_loader import load_to_mongo_task 
+from binance_wss.data.extract import extract_all
+from binance_wss.data.transform import transform_merge
+from binance_wss.data.load import load_to_mongo_task 
 
 
 with DAG(

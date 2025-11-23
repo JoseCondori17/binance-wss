@@ -1,17 +1,14 @@
 import time
 import polars as pl
 from binance.client import Client
-from binance_wss.config.settings import settings
+from ..app.settings import settings
 
-# El cliente de Binance usa 'tld' 
-# Por defecto usa https://api.binance.com
 client = Client(
     api_key=settings.BINANCE_API_KEY,
     api_secret=settings.BINANCE_API_SECRET_KEY
 )
 
 def extract_klines(symbol: str, limit: int | None):
-    #client = Client()
     interval = Client.KLINE_INTERVAL_1MINUTE
     data = client.get_historical_klines(
         symbol=symbol,
@@ -35,7 +32,6 @@ def extract_aggtrades(
     end_time: int | None, 
     limit: int | None
 ):
-    #client = Client()
     data = client.get_aggregate_trades(
         symbol=symbol,
         startTime=start_time,

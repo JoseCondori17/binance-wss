@@ -1,10 +1,10 @@
 # binance_wss/load/mongo_loader.py
 
 import asyncio
-from datetime import datetime, timezone  # añadimos timezone
 
-from binance_wss.main import init_db                     # inicializa Mongo + Beanie
-from binance_wss.models.mongo_models import Kline, AggTrade  # modelos desde nuevo módulo
+from datetime import datetime, timezone
+from binance_wss.app.db import init_db
+from binance_wss.app.models.mongo_models import Kline
 
 
 def to_datetime_ms(value):

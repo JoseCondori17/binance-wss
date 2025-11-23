@@ -1,30 +1,39 @@
+# src/binance_wss/run_etl_once.py
+
 import asyncio
+from binance_wss.app.db import init_db
+from binance_wss.data.extract import extract_all
+from binance_wss.data.transform import transform_merge
+from binance_wss.data.load import load_to_mongo
 
-from binance_wss.extract.binance_client import extract_all          # ETL: Extract
-from binance_wss.transform.kline_processor import transform_merge     # ETL: Transform
-from binance_wss.load.mongo_loader import load_to_mongo                  # ETL: Load
-from binance_wss.main import init_db                        # inicializa Beanie + Mongo
+# Clase dummy para simular XCom pull de Airflow
+class DummyTI:
+    def __init__(self, data_dict):
+        self._data = data_dict
 
+    def xcom_pull(self, task_ids):
+        # Retorna datos según el task_id que se pide
+        # En este caso solo soportamos "extract" y "transform"
+        return self._data
 
 async def main():
-    #Inicializar conexión a Mongo y modelos Beanie
+    # Inicializar Beanie + MongoDB
     await init_db()
 
-    #EXTRACT: traer datos de Binance (klines + aggtrades)
-    data = extract_all()   # {'klines': DataFrame, 'aggtrades': lista de DataFrames}
+    # ---------------- EXTRACT ----------------
+    data = extract_all()  # {'klines': DataFrame, 'aggtrades': lista de DataFrames}
+    print("Extracted data keys:", data.keys())
 
-    #TRANSFORM: castear tipos, unir klines con aggtrades
-    merged_df = transform_merge(data)
+    # ---------------- TRANSFORM ----------------
+    dummy_extract_ti = DummyTI(data)
+    merged_data = transform_merge(ti=dummy_extract_ti)
+    print("Number of rows after transform:", len(merged_data))
+    print("Sample row:", merged_data[0])
 
-    print("Filas del DataFrame final:", merged_df.height)
-    print(merged_df.head())
-    #print(merged_df.head(10))
-    
-    #LOAD: insertar en MongoDB
-    await load_to_mongo(merged_df)
-
-    print("datos cargados en MongoDB :b")
-
+    # ---------------- LOAD ----------------
+    dummy_transform_ti = DummyTI(merged_data)
+    await load_to_mongo(ti=dummy_transform_ti)
+    print("Data successfully loaded into MongoDB ✅")
 
 if __name__ == "__main__":
     asyncio.run(main())
