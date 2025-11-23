@@ -1,29 +1,24 @@
-from pymongo import MongoClient
-from pymongo.errors import PyMongoError
-from pymongo.server_api import ServerApi
+import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
+from typing import Optional
 
 from .settings import settings
 from .models.mongo_models import Kline
 
-def get_connection():
-    try:
-        client = MongoClient(
-            settings.MONGODB_URI,
-            server_api=ServerApi("1")
-        )
-        client.admin.command("ping")
-        db = client[settings.MONGODB_DB_NAME]
-        return client, db
-    except PyMongoError as e:
-        print(f"Error connecting to MongoDB: {e}")
-        return None, None
+_db_client: Optional[AsyncIOMotorClient] = None
+_db_initialized = False
 
-async def init_db():
-    client = AsyncIOMotorClient(settings.MONGODB_URI, server_api=ServerApi("1"))
-    db = client[settings.MONGODB_DB_NAME]
+async def get_db():
+    global _db_client, _db_initialized
 
-    await init_beanie(database=db, document_models=[Kline])
-    print("Beanie MongoDB initialized")
-    return db
+    if not _db_client:
+        _db_client = AsyncIOMotorClient(settings.MONGODB_URI)
+    
+    if not _db_initialized:
+        db = _db_client[settings.MONGODB_DB_NAME]
+        await init_beanie(database=db, document_models=[Kline])
+        _db_initialized = True
+        print("Beanie MongoDB initialized (singleton)")
+
+    return _db_client[settings.MONGODB_DB_NAME]
