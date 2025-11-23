@@ -22,6 +22,7 @@ services:
       - PYTHONPATH=/opt/airflow/src
       - _AIRFLOW_WWW_USER_USERNAME=airflow
       - _AIRFLOW_WWW_USER_PASSWORD=airflow
+      - _PIP_ADDITIONAL_REQUIREMENTS=polars motor beanie python-binance pydantic-settings
 
     volumes:
       - ./airflow-local/dags:/opt/airflow/dags
