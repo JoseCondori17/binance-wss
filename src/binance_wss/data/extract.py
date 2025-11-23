@@ -3,10 +3,7 @@ import polars as pl
 from binance.client import Client
 from ..app.settings import settings
 
-client = Client(
-    api_key=settings.BINANCE_API_KEY,
-    api_secret=settings.BINANCE_API_SECRET_KEY
-)
+client = Client()
 
 def extract_klines(symbol: str, limit: int | None):
     interval = Client.KLINE_INTERVAL_1MINUTE

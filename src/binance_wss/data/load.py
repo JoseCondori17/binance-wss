@@ -61,27 +61,8 @@ async def load_to_mongo(**context):
             "number_of_trades": int(row["number_of_trades"]),
             "taker_buy_base_asset_volume": float(row["taker_buy_base_asset_volume"]),
             "taker_buy_quote_asset_volume": float(row["taker_buy_quote_asset_volume"]),
+            "aggtrades": row.get("aggtrades", [])
         }
-
-        aggtrades_df = row.get("aggtrades")
-        aggtrades_objects = []
-
-        if isinstance(aggtrades_df, pl.DataFrame):
-            for agg_row in aggtrades_df.iter_rows(named=True):
-                aggtrades_objects.append(
-                    AggTrade(
-                        trade_id=int(agg_row["agg_trade_id"]),
-                        price=float(agg_row["price"]),
-                        quantity=float(agg_row["quantity"]),
-                        first_trade_id=int(agg_row["first_trade_id"]),
-                        last_trade_id=int(agg_row["last_trade_id"]),
-                        timestamp=agg_row["timestamp"],
-                        is_buyer_maker=bool(agg_row["is_buyer_maker"]),
-                        is_best_match=bool(agg_row["is_best_match"]),
-                    )
-                )
-
-        kline_data["aggtrades"] = aggtrades_objects
         records.append(Kline(**kline_data))
 
     if records:

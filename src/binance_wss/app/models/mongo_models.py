@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 
 class AggTrade(BaseModel):
-    trade_id: int
+    agg_trade_id: int
     price: float
     quantity: float
     first_trade_id: int
@@ -30,7 +30,7 @@ class Kline(Document):
     number_of_trades: int
     taker_buy_base_asset_volume: float
     taker_buy_quote_asset_volume: float
-    aggtrades: list[AggTrade] = []
+    aggtrades: list[AggTrade]
 
     class Settings:
         name = "kline_with_aggtrades"

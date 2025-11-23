@@ -1,7 +1,7 @@
 # src/binance_wss/run_etl_once.py
 
 import asyncio
-from binance_wss.app.db import init_db
+from binance_wss.app.db import get_db
 from binance_wss.data.extract import extract_all
 from binance_wss.data.transform import transform_merge
 from binance_wss.data.load import load_to_mongo
@@ -18,7 +18,7 @@ class DummyTI:
 
 async def main():
     # Inicializar Beanie + MongoDB
-    await init_db()
+    await get_db()
 
     # ---------------- EXTRACT ----------------
     data = extract_all()  # {'klines': DataFrame, 'aggtrades': lista de DataFrames}
