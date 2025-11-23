@@ -20,6 +20,8 @@ def extract_klines(symbol: str, limit: int | None):
         "taker_buy_quote_asset_volume", "ignore"
     ], orient="row")
 
+    df = df.with_columns(pl.lit(symbol).alias("symbol"))
+
     time.sleep(0.2)
     return df
 
@@ -52,13 +54,13 @@ def extract_aggtrades(
 
 def extract_all():
     limit = 10
-    klines = extract_klines("BTCUSDT", limit)
+    klines = extract_klines("ETHUSDT", limit)
 
     result = []
     for row in klines.iter_rows(named=True):
         open_time = row["open_time"]
         close_time = row["close_time"]
-        agg_df = extract_aggtrades("BTCUSDT", open_time, close_time, limit)
+        agg_df = extract_aggtrades("ETHUSDT", open_time, close_time, limit)
 
         result.append({
             "kline_open": int(open_time),
