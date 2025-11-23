@@ -1,5 +1,39 @@
 services:
 
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: binance-api
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/app/src
+    ports:
+      - "8000:8000"
+    networks:
+      - binance-network
+    volumes:
+      - ./src:/app/src
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: binance-dashboard
+    restart: always
+    environment:
+      - API_HOST=api
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+    networks:
+      - binance-network
+    volumes:
+      - ./dashboard:/app/dashboard
+
   airflow:
     image: apache/airflow:2.10.0-python3.12
     container_name: airflow-binance
@@ -13,7 +47,6 @@ services:
       - _AIRFLOW_WWW_USER_USERNAME=airflow
       - _AIRFLOW_WWW_USER_PASSWORD=airflow
       - _PIP_ADDITIONAL_REQUIREMENTS=polars motor beanie python-binance pydantic-settings
-
     volumes:
       - ./airflow-local/dags:/opt/airflow/dags
       - ./airflow-local/logs:/opt/airflow/logs
@@ -21,6 +54,12 @@ services:
       - ./src:/opt/airflow/src
     ports:
       - "8080:8080"
+    networks:
+      - binance-network
+
+networks:
+  binance-network:
+    driver: bridge
 
 volumes:
   mongo_data:
