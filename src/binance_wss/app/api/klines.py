@@ -1,20 +1,13 @@
-"""
-API REST para gestionar Klines de Binance usando FastAPI y Beanie.
-Endpoints CRUD completos con filtros avanzados.
-"""
 from datetime import datetime
 from typing import List, Optional
 from bson import ObjectId
 
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from fastapi import HTTPException, Query, APIRouter
+from pydantic import BaseModel
+from ..models.mongo_models import Kline, AggTrade
 
-from binance_wss.main import init_db
-from binance_wss.models.mongo_models import Kline, AggTrade
+router = APIRouter(prefix="/kline", tags=["Klines"])
 
-
-# ---------- Modelos Pydantic para la API ----------
 class AggTradeResponse(BaseModel):
     """Modelo de respuesta para AggTrade"""
     trade_id: int
@@ -75,38 +68,6 @@ class KlineResponse(KlineBase):
     class Config:
         from_attributes = True
 
-
-# ---------- FastAPI App ----------
-app = FastAPI(
-    title="Binance Klines API",
-    description="API REST para gestionar velas (klines) de Binance almacenadas en MongoDB",
-    version="1.0.0"
-)
-
-# CORS middleware para permitir requests desde el frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # En producción, especifica los orígenes permitidos
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-# ---------- Event Handlers ----------
-@app.on_event("startup")
-async def startup_event():
-    """Inicializa la conexión a MongoDB al iniciar la API"""
-    await init_db()
-    print("MongoDB conectado y Beanie inicializado")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Cierra conexiones al apagar la API"""
-    print(" Cerrando conexiones...")
-
-
 # ---------- Helper Functions ----------
 def kline_to_response(kline: Kline) -> KlineResponse:
     """Convierte un documento Kline de Beanie a KlineResponse"""
@@ -140,27 +101,7 @@ def kline_to_response(kline: Kline) -> KlineResponse:
         ]
     )
 
-
-# ---------- Endpoints CRUD ----------
-
-@app.get("/", tags=["Root"])
-async def root():
-    """Endpoint raíz con información de la API"""
-    return {
-        "message": "Binance Klines API",
-        "version": "1.0.0",
-        "docs": "/docs",
-        "endpoints": {
-            "GET /klines": "Listar velas con filtros",
-            "POST /klines": "Crear una nueva vela",
-            "GET /klines/{id}": "Obtener una vela por ID",
-            "PUT /klines/{id}": "Actualizar una vela",
-            "DELETE /klines/{id}": "Eliminar una vela"
-        }
-    }
-
-
-@app.post("/klines", response_model=KlineResponse, status_code=201, tags=["Klines"])
+@router.post("/klines", response_model=KlineResponse, status_code=201, tags=["Klines"])
 async def create_kline(kline: KlineCreate):
     """
     **POST /klines** - Crear una nueva vela
@@ -206,7 +147,7 @@ async def create_kline(kline: KlineCreate):
         raise HTTPException(status_code=400, detail=f"Error al crear kline: {str(e)}")
 
 
-@app.get("/klines", response_model=List[KlineResponse], tags=["Klines"])
+@router.get("/klines", response_model=List[KlineResponse], tags=["Klines"])
 async def list_klines(
     symbol: Optional[str] = Query(None, description="Filtrar por símbolo (ej: BTCUSDT)"),
     start_date: Optional[datetime] = Query(None, description="Fecha de inicio (open_time >= start_date)"),
@@ -262,7 +203,7 @@ async def list_klines(
         raise HTTPException(status_code=500, detail=f"Error al obtener klines: {str(e)}")
 
 
-@app.get("/klines/{kline_id}", response_model=KlineResponse, tags=["Klines"])
+@router.get("/klines/{kline_id}", response_model=KlineResponse, tags=["Klines"])
 async def get_kline(kline_id: str):
     """
     **GET /klines/{id}** - Obtener una vela por ID
@@ -284,7 +225,7 @@ async def get_kline(kline_id: str):
         raise HTTPException(status_code=500, detail=f"Error al obtener kline: {str(e)}")
 
 
-@app.put("/klines/{kline_id}", response_model=KlineResponse, tags=["Klines"])
+@router.put("/klines/{kline_id}", response_model=KlineResponse, tags=["Klines"])
 async def update_kline(kline_id: str, kline_update: KlineUpdate):
     """
     **PUT /klines/{id}** - Actualizar una vela
@@ -330,7 +271,7 @@ async def update_kline(kline_id: str, kline_update: KlineUpdate):
         raise HTTPException(status_code=500, detail=f"Error al actualizar kline: {str(e)}")
 
 
-@app.delete("/klines/{kline_id}", tags=["Klines"])
+@router.delete("/klines/{kline_id}", tags=["Klines"])
 async def delete_kline(kline_id: str):
     """
     **DELETE /klines/{id}** - Eliminar una vela
@@ -355,7 +296,7 @@ async def delete_kline(kline_id: str):
 
 # ---------- Endpoints adicionales útiles ----------
 
-@app.get("/klines/stats/symbols", tags=["Stats"])
+@router.get("/klines/stats/symbols", tags=["Stats"])
 async def get_symbols():
     """
     **GET /klines/stats/symbols** - Obtener lista de símbolos únicos
@@ -373,7 +314,7 @@ async def get_symbols():
         raise HTTPException(status_code=500, detail=f"Error al obtener símbolos: {str(e)}")
 
 
-@app.get("/klines/stats/count", tags=["Stats"])
+@router.get("/klines/stats/count", tags=["Stats"])
 async def get_count(
     symbol: Optional[str] = Query(None, description="Filtrar por símbolo"),
     start_date: Optional[datetime] = Query(None, description="Fecha de inicio"),
