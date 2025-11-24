@@ -4,6 +4,10 @@
 
 Sistema ETL de alto rendimiento para análisis de mercado de criptomonedas que extrae datos en tiempo real de Binance (klines y aggregate trades), los procesa con Polars y los almacena en MongoDB. Incluye una API REST con FastAPI para consulta de KPIs (volatilidad, volumen, presión compradora/vendedora) y un dashboard interactivo con Streamlit para visualización de datos. La orquestación se realiza con Apache Airflow mediante ejecuciones programadas cada hora, todo desplegado en una arquitectura de microservicios con Docker Compose.
 
+## Link Drive con toda la info
+
+https://drive.google.com/drive/folders/1j-weCSCoBJ3C5njp_TRPb9CYb4d_E_x3?usp=sharing
+
 ## Requisitos Previos
 
 - Python 3.12 o 3.13
